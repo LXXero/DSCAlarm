@@ -1,10 +1,9 @@
 /*
- *  DSC Carbon Monoxide Device
+ *  DSC Zone Carbon Monoxide Device
  *
  *  Author: Jordan <jordan@xeron.cc>
- *  Originally by: Matt Martz <matt.martz@gmail.com>
- *  Modified by: Kent Holloway <drizit@gmail.com>
- *  Date: 2016-02-27
+ *  Originally By: Matt Martz <matt.martz@gmail.com>, Kent Holloway <drizit@gmail.com>
+ *  Date: 2018-08-29
  */
 
 // for the UI
@@ -16,6 +15,7 @@ metadata {
     capability "Momentary"
     attribute "bypass", "string"
     attribute "trouble", "string"
+    attribute "alarm", "string"
 
     // Add commands as needed
     command "zone"
@@ -30,7 +30,7 @@ metadata {
     multiAttributeTile(name:"zone", type: "generic", width: 6, height: 4) {
       tileAttribute ("device.carbonMonoxide", key: "PRIMARY_CONTROL") {
         attributeState "clear", label: 'clear', icon: "st.alarm.carbon-monoxide.clear", backgroundColor: "#ffffff"
-        attributeState "detected", label: 'SMOKE', icon: "st.alarm.carbon-monoxide.carbon-monoxide", backgroundColor: "#e86d13"
+        attributeState "detected", label: 'CO2', icon: "st.alarm.carbon-monoxide.carbon-monoxide", backgroundColor: "#e86d13"
         attributeState "tested", label: 'TESTED', icon: "st.alarm.carbon-monoxide.test", backgroundColor: "#e86d13"
       }
       tileAttribute ("device.trouble", key: "SECONDARY_CONTROL") {
@@ -40,18 +40,19 @@ metadata {
       }
     }
     standardTile("bypass", "device.bypass", width: 3, height: 2, title: "Bypass Status", decoration:"flat"){
-      state "off", label: 'Enabled', icon: "st.security.alarm.on"
-      state "on", label: 'Bypassed', icon: "st.security.alarm.off"
+      state "off", label: 'Enabled', action: "bypass", icon: "st.security.alarm.on"
+      state "on", label: 'Bypassed', action: "bypass", icon: "st.security.alarm.off"
     }
-    standardTile("bypassbutton", "capability.momentary", width: 3, height: 2, title: "Bypass Button", decoration: "flat"){
-      state "bypass", label: 'Bypass', action: "bypass", icon: "st.locks.lock.unlocked"
+    standardTile("alarm", "device.alarm", width: 3, height: 2, title: "Alarm Status", decoration: "flat"){
+      state "alarm", label: 'ALARM', icon: "st.security.alarm.on"
+      state "noalarm", label: 'No Alarm', icon: "st.security.alarm.off"
     }
 
     // This tile will be the tile that is displayed on the Hub page.
     main "zone"
 
     // These tiles will be displayed when clicked on the device, in the order listed here.
-    details(["zone", "bypass", "bypassbutton"])
+    details(["zone", "bypass", "alarm"])
   }
 }
 
@@ -72,19 +73,23 @@ def zone(String state) {
 
   def troubleList = ['fault','tamper','restore']
   def bypassList = ['on','off']
+  def alarmList = ['alarm','noalarm']
 
   if (troubleList.contains(state)) {
-    // Send final event
     sendEvent (name: "trouble", value: "${state}")
   } else if (bypassList.contains(state)) {
     sendEvent (name: "bypass", value: "${state}")
   } else {
+    // Send actual alarm state, if we have one
+    if (alarmList.contains(state)) {
+      sendEvent (name: "alarm", value: "${state}")
+    }
     // Since this is a carbonMonoxide device we need to convert the values to match the device capabilities
-    // before sending the event
     def eventMap = [
      'open':"tested",
      'closed':"clear",
-     'alarm':"detected"
+     'alarm':"detected",
+     'noalarm':"clear"
     ]
     def newState = eventMap."${state}"
     // Send final event
