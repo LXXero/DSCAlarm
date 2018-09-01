@@ -44,8 +44,8 @@ metadata {
       state "on", label: 'Bypassed', action: "bypass", icon: "st.security.alarm.off"
     }
     standardTile("alarm", "device.alarm", width: 3, height: 2, title: "Alarm Status", decoration: "flat"){
-      state "both", label: 'ALARM', icon: "st.security.alarm.on"
       state "off", label: 'No Alarm', icon: "st.security.alarm.off"
+      state "both", label: 'ALARM', icon: "st.security.alarm.on"
     }
 
     // This tile will be the tile that is displayed on the Hub page.
