@@ -12,10 +12,10 @@ metadata {
     // Change or define capabilities here as needed
     capability "Smoke Detector"
     capability "Sensor"
+    capability "Alarm"
     capability "Momentary"
     attribute "bypass", "string"
     attribute "trouble", "string"
-    attribute "alarm", "string"
 
     // Add commands as needed
     command "zone"
@@ -44,8 +44,8 @@ metadata {
       state "on", label: 'Bypassed', action: "bypass", icon: "st.security.alarm.off"
     }
     standardTile("alarm", "device.alarm", width: 3, height: 2, title: "Alarm Status", decoration: "flat"){
-      state "alarm", label: 'ALARM', icon: "st.security.alarm.on"
-      state "noalarm", label: 'No Alarm', icon: "st.security.alarm.off"
+      state "both", label: 'ALARM', icon: "st.security.alarm.on"
+      state "off", label: 'No Alarm', icon: "st.security.alarm.off"
     }
 
     // This tile will be the tile that is displayed on the Hub page.
@@ -73,7 +73,10 @@ def zone(String state) {
 
   def troubleList = ['fault','tamper','restore']
   def bypassList = ['on','off']
-  def alarmList = ['alarm','noalarm']
+  def alarmMap = [
+    'alarm': "both",
+    'noalarm': "off"
+  ]
 
   if (troubleList.contains(state)) {
     sendEvent (name: "trouble", value: "${state}")
@@ -81,8 +84,8 @@ def zone(String state) {
     sendEvent (name: "bypass", value: "${state}")
   } else {
     // Send actual alarm state, if we have one
-    if (alarmList.contains(state)) {
-      sendEvent (name: "alarm", value: "${state}")
+    if (alarmMap.containsKey(state)) {
+      sendEvent (name: "alarm", value: "${alarmMap[state]}")
     }
     // Since this is a smoke device we need to convert the values to match the device capabilities
     def eventMap = [
@@ -91,8 +94,8 @@ def zone(String state) {
      'alarm':"detected",
      'noalarm':"clear"
     ]
-    def newState = eventMap."${state}"
+
     // Send final event
-    sendEvent (name: "smoke", value: "${newState}")
+    sendEvent (name: "smoke", value: "${eventMap[state]}")
   }
 }
