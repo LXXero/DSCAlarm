@@ -378,8 +378,9 @@ class EnvisalinkClient(asynchat.async_chat):
             self.send_command('005', self._config.ENVISALINKPASS)
         if parameters == '1':
             self.send_command('001', '')
-            time.sleep(2)
-            self.send_command('071', '1*1#')
+            #this was to update bypass status, but sometimes would change alarm arm status from stay/away
+            #time.sleep(2)
+            #self.send_command('071', '1*1#')
         if parameters == '0':
             alarmserver_logger('Incorrect envisalink password')
             sys.exit(0)
