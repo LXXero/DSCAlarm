@@ -556,7 +556,7 @@ class EnvisalinkClient(asynchat.async_chat):
              if int(parameters) in self._config.ZONENAMES and self._config.ZONENAMES[int(parameters)]!=False:
                codeMap = {
                  601:'alarm',
-                 602:'closed',
+                 602:'noalarm',
                  603:'tamper',
                  604:'restore',
                  605:'fault',
