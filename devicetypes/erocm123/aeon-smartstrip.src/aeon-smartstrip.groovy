@@ -243,10 +243,10 @@ def onOffCmd(value, endpoint = null) {
     logging("onOffCmd($value, $endpoint)")
     def actions = [
             new physicalgraph.device.HubAction(encap(zwave.basicV1.basicSet(value: value), endpoint)),
-            new physicalgraph.device.HubAction(encap(zwave.switchBinaryV1.switchBinaryGet(), endpoint)),
             new physicalgraph.device.HubAction(encap(zwave.meterV3.meterGet(scale: 2), endpoint)),
+            new physicalgraph.device.HubAction(encap(zwave.switchBinaryV1.switchBinaryGet(), endpoint)),
     ]
-    sendHubCommand(actions, 500)
+    sendHubCommand(actions, 1000)
 }
 
 
