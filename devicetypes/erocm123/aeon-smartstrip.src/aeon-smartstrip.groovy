@@ -181,7 +181,13 @@ def zwaveEvent(physicalgraph.zwave.commands.multichannelv3.MultiChannelCmdEncap 
 
 def zwaveEvent(physicalgraph.zwave.commands.basicv1.BasicReport cmd, endpoint) {
     logging("BasicReport $cmd, $endpoint")
-    zwaveBinaryEvent(cmd, endpoint)
+    def cmds = []
+    (1..4).each { n ->
+            cmds << encap(zwave.switchBinaryV1.switchBinaryGet(), n)
+            cmds << "delay 1000"
+    }
+
+    return response(cmds)
 }
 
 def zwaveEvent(physicalgraph.zwave.commands.switchbinaryv1.SwitchBinaryReport cmd, endpoint) {
@@ -243,10 +249,10 @@ def onOffCmd(value, endpoint = null) {
     logging("onOffCmd($value, $endpoint)")
     def actions = [
             new physicalgraph.device.HubAction(encap(zwave.basicV1.basicSet(value: value), endpoint)),
-            new physicalgraph.device.HubAction(encap(zwave.meterV3.meterGet(scale: 2), endpoint)),
             new physicalgraph.device.HubAction(encap(zwave.switchBinaryV1.switchBinaryGet(), endpoint)),
+            new physicalgraph.device.HubAction(encap(zwave.meterV3.meterGet(scale: 2), endpoint)),
     ]
-    sendHubCommand(actions, 1000)
+    sendHubCommand(actions, 500)
 }
 
 
